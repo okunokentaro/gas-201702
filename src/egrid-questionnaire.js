@@ -10,7 +10,7 @@ function create(title, items) {
   const questionnaire = form.addGridItem()
   questionnaire
     .setRows(itemsArray)
-    .setColumns(['当てはまる', 'やや当てはまる', 'あまり当てはまらない', '当てはまらない']);
+    .setColumns(['当てはまる', 'やや当てはまる', 'あまり当てはまらない', '当てはまらない'])
 
   return {
     formPublishUrl: form.getPublishedUrl(),

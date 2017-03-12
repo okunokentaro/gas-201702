@@ -14,13 +14,13 @@ function getJson(url) {
   const items = []
   let i, j
   for (i = 1; i < values.length; ++i) {
-    var obj = {}
+    const obj = {}
     for (j = 1; j < values[i].length; ++j) {
-      var head = values[0][j]
+      const head = values[0][j]
       obj[head.slice(2, head.length - 1)] = map[values[i][j]]
     }
     items.push(obj)
   }
 
-  return JSON.stringify(items);
+  return JSON.stringify(items)
 }
