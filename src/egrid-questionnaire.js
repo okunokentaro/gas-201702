@@ -1,25 +1,20 @@
-function doGet(e) {
-  if (!e.parameters.items) {
-    return ContentService.createTextOutput('OK');
-  }
-  var title = e.parameters.title;
-  var form = FormApp.create(title);
-  var sheet = SpreadsheetApp.create(title);
-  form.setDestination(FormApp.DestinationType.SPREADSHEET, sheet.getId());
+function create(title, items) {
+  const form  = FormApp.create(title)
+  const sheet = SpreadsheetApp.create(title)
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, sheet.getId())
 
-  var questionnaire = form.addGridItem();
+  const nameText = form.addTextItem()
+  nameText.setTitle('氏名')
+
+  const itemsArray    = items.split('\n')
+  const questionnaire = form.addGridItem()
   questionnaire
-    .setRows(e.parameters.items)
+    .setRows(itemsArray)
     .setColumns(['当てはまる', 'やや当てはまる', 'あまり当てはまらない', '当てはまらない']);
 
-  var callback = e.parameters.callback;
-  var content = JSON.stringify({
-    formUrl: form.getPublishedUrl(),
-    formEditUrl: form.getEditUrl(),
-    sheetUrl: sheet.getUrl()
-  });
-  if (callback) {
-    content = callback + '(' + content + ')';
+  return {
+    formPublishUrl: form.getPublishedUrl(),
+    formEditUrl:    form.getEditUrl(),
+    sheetUrl:       sheet.getUrl(),
   }
-  return ContentService.createTextOutput(content).setMimeType(ContentService.MimeType.JAVASCRIPT);
 }

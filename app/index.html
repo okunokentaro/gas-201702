@@ -10,7 +10,33 @@
 </head>
 
 <body>
-  <h1>アンケート作成</h1>
+  <div class="ui container">
+    <div class="ui grid">
+      <div class="sixteen wide column">
+        <h1>アンケート作成</h1>
+      </div>
+    </div>
+
+    <div class="ui grid">
+      <div class="sixteen wide column">
+        <form id="create-questionnaire" class="ui form">
+          <div class="field">
+            <label>タイトル</label>
+            <input type="text" name="title" placeholder="タイトル">
+          </div>
+          <div class="field">
+            <label>項目（改行区切り）</label>
+            <textarea title="items"></textarea>
+          </div>
+          <button id="submit" class="ui button" type="submit">作成</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="result" class="ui grid">
+    </div>
+
+  </div>
 </body>
 
 </html>
