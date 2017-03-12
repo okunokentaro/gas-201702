@@ -4,5 +4,11 @@
   "main": "index.js",
   "repository": "https://github.com/armorik83/gas-201702",
   "author": "OKUNOKENTARO <okunokentaro@me.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "serve": "superstatic ./app"
+  },
+  "devDependencies": {
+    "superstatic": "^4.0.3"
+  }
 }
