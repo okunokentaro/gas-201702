@@ -1,0 +1,8 @@
+{
+  "name": "gas-201702",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/armorik83/gas-201702",
+  "author": "OKUNOKENTARO <okunokentaro@me.com>",
+  "license": "MIT"
+}
