@@ -28,12 +28,33 @@
             <label>項目（改行区切り）</label>
             <textarea title="items"></textarea>
           </div>
-          <button id="submit" class="ui button" type="submit">作成</button>
+          <button id="create-questionnaire-submit" class="ui button" type="submit">作成</button>
         </form>
       </div>
     </div>
 
-    <div id="result" class="ui grid">
+    <div id="questionnaire-result" class="ui grid">
+    </div>
+
+    <div class="ui grid">
+      <div class="sixteen wide column">
+        <h1>アンケート取得</h1>
+      </div>
+    </div>
+
+    <div class="ui grid">
+      <div class="sixteen wide column">
+        <form id="get-spreadsheet" class="ui form">
+          <div class="field">
+            <label>スプレッドシートURL</label>
+            <input type="text" name="url" placeholder="スプレッドシートURL">
+          </div>
+          <button id="get-spreadsheet-submit" class="ui button" type="submit">取得</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="spreadsheet-result" class="ui grid">
     </div>
 
   </div>

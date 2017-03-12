@@ -1,17 +1,34 @@
-let submitButtonElem // HTMLElement
+let questionnaireSubmitElem // HTMLElement
 let titleElem // HTMLElement
 let itemsElem // HTMLElement
+let urlElem // HTMLElement
+
+const googleApisRoot = 'https://script.googleapis.com'
 
 const scope = [
   'https://www.googleapis.com/auth/spreadsheets',
   'https://www.googleapis.com/auth/forms',
 ].join(' ')
 
-const tokens = {
+const configs = {
   questionnaire: {
     apiId:    'M8q7xLgGACBCmy5SJER6RiaMQeXE4HVlN',
     clientId: '82544417006-7ij3kh1bgve74gp0g7fqvhaf72pq2fe6.apps.googleusercontent.com',
+    functionName: 'create',
   },
+  spreadsheet: {
+    apiId:    'MKqlNvaESBD7vMuJXZieE-KMQeXE4HVlN',
+    clientId: '582745044833-qm13neu8eh507deidr6cq3phkmn4jaro.apps.googleusercontent.com',
+    functionName: 'getJson',
+  },
+}
+
+/**
+ *
+ * @param {string} apiId
+ */
+const getPath = (apiId) => {
+  return `v1/scripts/${apiId}:run`
 }
 
 /**
@@ -31,12 +48,17 @@ const handleError = (err) => {
 const clearInputs = () => {
   titleElem.value = ''
   itemsElem.value = ''
-  submitButtonElem.innerText = '送信'
-  submitButtonElem.removeAttribute('disabled')
+  questionnaireSubmitElem.innerText = '送信'
+  questionnaireSubmitElem.removeAttribute('disabled')
 }
 
-const renderResult = (result) => {
-  const resultElem = document.querySelector('#result')
+const renderLoadingButton = () => {
+  questionnaireSubmitElem.innerText = '送信中'
+  questionnaireSubmitElem.setAttribute('disabled', 'disabled')
+}
+
+const renderQuestionnaireResult = (result) => {
+  const resultElem = document.querySelector('#questionnaire-result')
   resultElem.innerHTML = `
     <div class="sixteen wide column">
       <ul>
@@ -44,22 +66,31 @@ const renderResult = (result) => {
         <li><a href="${result.formEditUrl}">Form編集</a></li>
         <li><a href="${result.sheetUrl}">Spreadsheet</a></li>
       </ul>
+      <pre>${result.sheetUrl}</pre>
+    </div>
+  `
+}
+
+const renderSpreadsheetResult = (result) => {
+  const resultElem = document.querySelector('#spreadsheet-result')
+  resultElem.innerHTML = `
+    <div class="sixteen wide column">
+      <pre>${result}</pre>
     </div>
   `
 }
 
 /**
- * @param {string} title
- * @param {string} items
+ * @param {{title: string, items.string}} obj
  */
-const callGas = (title, items) => {
+const callQuestionnaire = (obj) => {
   const request = gapi.client.request({
-    root: 'https://script.googleapis.com',
-    path: `v1/scripts/${tokens.questionnaire.apiId}:run`,
+    root: googleApisRoot,
+    path: getPath(configs.questionnaire.apiId),
     method: 'POST',
     body: {
-      function:   'create',
-      parameters: [title, items],
+      function:   configs.questionnaire.functionName,
+      parameters: [obj.title, obj.items],
       devMode:    true,
     }
   })
@@ -70,33 +101,83 @@ const callGas = (title, items) => {
       return
     }
     clearInputs()
-    renderResult(res.response.result)
+    renderQuestionnaireResult(res.response.result)
   })
 }
 
+/**
+ * @param {{url: string}} obj
+ */
+const callSpreadsheet = (obj) => {
+  const request = gapi.client.request({
+    root: googleApisRoot,
+    path: getPath(configs.spreadsheet.apiId),
+    method: 'POST',
+    body: {
+      function:   configs.spreadsheet.functionName,
+      parameters: [obj.url],
+      devMode:    true,
+    }
+  })
+
+  request.execute((res) => {
+    if (res.error) {
+      handleError(res.error)
+      return
+    }
+
+    renderSpreadsheetResult(res.response.result)
+  })
+}
+
+const getValuesForQuestionnaire = (formElem) => {
+  titleElem   = formElem.querySelector('[name="title"]')
+  const title = titleElem.value
+
+  itemsElem   = formElem.querySelector('[title="items"]')
+  const items = itemsElem.value
+
+  return {title, items}
+}
+
+const getValuesForSpreadsheet = (formElem) => {
+  urlElem   = formElem.querySelector('[name="url"]')
+  const url = urlElem.value
+
+  return {url}
+}
+
 const main = () => {
-  const authData = {
-    client_id: tokens.questionnaire.clientId,
+  questionnaireSubmitElem = document.querySelector('#create-questionnaire-submit')
+
+  const questionnaireAuthData = {
+    client_id: configs.questionnaire.clientId,
     immediate: false,
     scope,
   }
 
-  const form = window.document.querySelector('#create-questionnaire')
-  form.addEventListener('submit', ev => {
+  const spreadsheetAuthData = {
+    client_id: configs.spreadsheet.clientId,
+    immediate: false,
+    scope,
+  }
+
+  const questionnaireForm = window.document.querySelector('#create-questionnaire')
+  questionnaireForm.addEventListener('submit', ev => {
     ev.preventDefault()
 
-    submitButtonElem = document.querySelector('#submit')
+    window.gapi.auth.authorize(questionnaireAuthData, () => {
+      renderLoadingButton()
+      callQuestionnaire(getValuesForQuestionnaire(questionnaireForm))
+    })
+  })
 
-    titleElem   = form.querySelector('[name="title"]')
-    const title = titleElem.value
+  const spreadsheetForm = window.document.querySelector('#get-spreadsheet')
+  spreadsheetForm.addEventListener('submit', ev => {
+    ev.preventDefault()
 
-    itemsElem   = form.querySelector('[title="items"]')
-    const items = itemsElem.value
-
-    window.gapi.auth.authorize(authData, () => {
-      submitButtonElem.innerText = '送信中'
-      submitButtonElem.setAttribute('disabled', 'disabled')
-      callGas(title, items)
+    window.gapi.auth.authorize(spreadsheetAuthData, () => {
+      callSpreadsheet(getValuesForSpreadsheet(spreadsheetForm))
     })
   })
 }
